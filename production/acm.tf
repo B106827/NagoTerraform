@@ -1,0 +1,16 @@
+# ---------------------------
+# ACM
+# ---------------------------
+# ACM
+resource "aws_acm_certificate" "app-cert" {
+  domain_name               = local.project_domain
+  subject_alternative_names = ["*.${local.project_domain}"]
+  validation_method         = "DNS"
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  tags = {
+    Name = "${local.project_name_env}-acm"
+  }
+}

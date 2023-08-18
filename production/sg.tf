@@ -4,18 +4,27 @@
 locals {
   anywhere_ip = "0.0.0.0/0"
 }
+
 # ---------------------------
 # Security Group
 # ---------------------------
-# 外部接続
-resource "aws_security_group" "allow-http-from-internet" {
-  name   = "${local.project_name_env}-allow-http-from-internet"
+# ALB用SG
+resource "aws_security_group" "alb-sg" {
+  name   = "${local.project_name_env}-alb-sg"
   vpc_id = module.vpc.vpc_id
 
   ingress {
-    protocol  = "tcp"
-    from_port = 80
-    to_port   = 80
+    protocol    = "tcp"
+    from_port   = 80
+    to_port     = 80
+    cidr_blocks = [
+      local.anywhere_ip
+    ]
+  }
+  ingress {
+    protocol    = "tcp"
+    from_port   = 443
+    to_port     = 443
     cidr_blocks = [
       local.anywhere_ip
     ]
@@ -29,73 +38,23 @@ resource "aws_security_group" "allow-http-from-internet" {
     ]
   }
   tags = {
-    Name = "${local.project_name_env}-allow-http-from-internet"
-  }
-}
-resource "aws_security_group" "allow-https-from-internet" {
-  name   = "${local.project_name_env}-allow-https-from-internet"
-  vpc_id = module.vpc.vpc_id
-
-  ingress {
-    protocol  = "tcp"
-    from_port = 443
-    to_port   = 443
-    cidr_blocks = [
-      local.anywhere_ip
-    ]
-  }
-  egress {
-    protocol    = -1
-    from_port   = 0
-    to_port     = 0
-    cidr_blocks = [
-      local.anywhere_ip
-    ]
-  }
-  tags = {
-    Name = "${local.project_name_env}-allow-https-from-internet"
+    Name = "${local.project_name_env}-alb-sg"
   }
 }
 
-# ICMP
-resource "aws_security_group" "allow-all-icmp" {
-  name   = "${local.project_name_env}-allow-icmp"
+# VPC内接続用SG（このSGが設定されたインスタンス同士は通信可能となる)
+resource "aws_security_group" "app-sg" {
+  name   = "${local.project_name_env}-app-sg"
   vpc_id = module.vpc.vpc_id
 
   ingress {
-    protocol    = "icmp"
-    from_port   = -1
-    to_port     = -1
-    cidr_blocks = [
-      local.vpc_cidr_block,
-    ]
-  }
-  egress {
-    protocol    = -1
-    from_port   = 0
-    to_port     = 0
-    cidr_blocks = [
-      local.anywhere_ip
-    ]
-  }
-  tags = {
-    Name = "${local.project_name_env}-allow-icmp"
-  }
-}
-
-# インスタンス間接続（このSGが設定されたインスタンス同士は通信可能となる)
-resource "aws_security_group" "allow-app" {
-  name   = "${local.project_name_env}-allow-app"
-  vpc_id = module.vpc.vpc_id
-
-  ingress {
-    protocol  = -1
+    protocol  = "-1"
     from_port = 0
     to_port   = 0
     self      = true
   }
   egress {
-    protocol    = -1
+    protocol    = "-1"
     from_port   = 0
     to_port     = 0
     cidr_blocks = [
@@ -103,6 +62,6 @@ resource "aws_security_group" "allow-app" {
     ]
   }
   tags = {
-    Name = "${local.project_name_env}-allow-app"
+    Name = "${local.project_name_env}-app-sg"
   }
 }

@@ -9,31 +9,28 @@ locals {
 # ALB
 # ---------------------------
 # ALB
-resource "aws_lb" "app-alb" {
-  name               = "${local.project_name_env}-app-alb"
+resource "aws_lb" "alb" {
+  name               = "${local.project_name_env}-alb"
   load_balancer_type = local.load_balancer_type
-  internal           = false
   # コネクションクローズまでの時間
   idle_timeout       = 60
 
+  internal                   = false
   enable_deletion_protection = false
 
   subnets         = module.vpc.public_subnets
   security_groups = [
-    aws_security_group.allow-app.id,
-    aws_security_group.allow-http-from-internet.id,
-    aws_security_group.allow-https-from-internet.id,
+    aws_security_group.alb-sg.id
   ]
 
   tags = {
-    Name = "${local.project_name_env}-app-alb"
-    env  = local.project_env
+    Name = "${local.project_name_env}-alb"
   }
 }
 
 # TargetGroup
-resource "aws_lb_target_group" "app-alb-targetgroup" {
-  name        = "${local.project_name_env}-app-alb-tg"
+resource "aws_lb_target_group" "alb-tg" {
+  name        = "${local.project_name_env}-alb-tg"
   port        = 80
   protocol    = "HTTP"
   vpc_id      = module.vpc.vpc_id
@@ -44,7 +41,7 @@ resource "aws_lb_target_group" "app-alb-targetgroup" {
   deregistration_delay = 300
 
   health_check {
-    path                = "/healthcheck"
+    path                = "/health_check"
     port                = 80
     protocol            = "HTTP"
     healthy_threshold   = 5
@@ -57,58 +54,34 @@ resource "aws_lb_target_group" "app-alb-targetgroup" {
   load_balancing_algorithm_type = "round_robin"
 
   tags = {
-    Name = "${local.project_name_env}-app-alb-tg"
-    env  = local.project_env
+    Name = "${local.project_name_env}-alb-tg"
   }
 }
 
-# Listener
-resource "aws_lb_listener" "app-alb-listener-http" {
-  load_balancer_arn = aws_lb.app-alb.arn
+# Listener（ HTTP ）
+resource "aws_lb_listener" "alb-listener-http" {
+  load_balancer_arn = aws_lb.alb.arn
   port              = 80
   protocol          = "HTTP"
   default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.app-alb-targetgroup.arn
-    #redirect {
-    #  port        = "443"
-    #  protocol    = "HTTPS"
-    #  status_code = "HTTP_301"
-    #}
+    type             = "redirect"
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
   }
 }
-# HTTPS化
-#resource "aws_lb_listener" "app-alb-listener-https" {
-#  load_balancer_arn = aws_lb.app-alb.arn
-#  port              = 443
-#  protocol          = "HTTPS"
-#  ssl_policy        = "ELBSecurityPolicy-2016-08"
-#  certificate_arn   = "arn:aws:iam::187416307283:server-certificate/test_cert_rab3wuqwgja25ct3n4jdj2tzu4"
-#  default_action {
-#    type = "fixed-response"
-#    fixed_response {
-#      content_type = "text/plain"
-#      message_body = "Not Found Host"
-#      status_code  = "404"
-#    }
-#  }
-#}
 
-# Listener Rule
-resource "aws_lb_listener_rule" "app-alb-listener-https-rule" {
-  listener_arn = aws_lb_listener.app-alb-listener-http.arn
-  priority     = 1
-
-  action {
+# Listener（ HTTPS ）
+resource "aws_lb_listener" "alb-listener-https" {
+  load_balancer_arn = aws_lb.alb.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+  certificate_arn   = aws_acm_certificate.app-cert.arn
+  default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.app-alb-targetgroup.arn
-  }
-
-  condition {
-    host_header {
-      values = [
-        local.project_domain
-      ]
-    }
+    target_group_arn = aws_lb_target_group.alb-tg.arn
   }
 }
