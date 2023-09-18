@@ -28,36 +28,6 @@ resource "aws_lb" "alb" {
   }
 }
 
-# TargetGroup
-resource "aws_lb_target_group" "alb-tg" {
-  name        = "${local.project_name_env}-alb-tg"
-  port        = 80
-  protocol    = "HTTP"
-  vpc_id      = module.vpc.vpc_id
-  target_type = "ip"
-
-  slow_start           = 0
-  # 完全にコネクションをクローズするまでの時間
-  deregistration_delay = 300
-
-  health_check {
-    path                = "/health_check"
-    port                = 80
-    protocol            = "HTTP"
-    healthy_threshold   = 5
-    unhealthy_threshold = 3
-    timeout             = 10
-    interval            = 30
-    matcher             = 200
-  }
-
-  load_balancing_algorithm_type = "round_robin"
-
-  tags = {
-    Name = "${local.project_name_env}-alb-tg"
-  }
-}
-
 # Listener（ HTTP ）
 resource "aws_lb_listener" "alb-listener-http" {
   load_balancer_arn = aws_lb.alb.arn
