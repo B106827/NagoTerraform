@@ -26,7 +26,7 @@ resource "aws_db_subnet_group" "private" {
 
 # RDS インスタンス
 resource "aws_db_instance" "rds" {
-  name                 = "${local.project_prefix}_${local.project_env}_rds"
+  name                 = "${local.project_prefix}-${local.project_env}-rds"
   identifier           = "${local.project_name_env}-rds"
   db_subnet_group_name = aws_db_subnet_group.private.id
   engine               = local.db_engine
@@ -42,7 +42,7 @@ resource "aws_db_instance" "rds" {
   allocated_storage = local.db_storage_size
   # セキュリティグループ
   vpc_security_group_ids = [
-     aws_security_group.app-sg.id,
+     aws_security_group.app_sg.id,
   ]
   # CloudWatch に出力するログ
   enabled_cloudwatch_logs_exports = [

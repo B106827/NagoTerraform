@@ -22,7 +22,7 @@ resource "aws_lb" "alb" {
 
   subnets         = module.vpc.public_subnets
   security_groups = [
-    aws_security_group.alb-sg.id
+    aws_security_group.alb_sg.id
   ]
 
   tags = {
@@ -31,7 +31,7 @@ resource "aws_lb" "alb" {
 }
 
 # Listener（ HTTP ）
-resource "aws_lb_listener" "alb-listener-http" {
+resource "aws_lb_listener" "alb_listener_http" {
   load_balancer_arn = aws_lb.alb.arn
   port              = 80
   protocol          = "HTTP"
@@ -46,7 +46,7 @@ resource "aws_lb_listener" "alb-listener-http" {
 }
 
 # ターゲットグループ
-resource "aws_lb_target_group" "alb-tg-app" {
+resource "aws_lb_target_group" "alb_tg_app" {
   name                 = "${local.project_name_env}-alb-tg-app"
   port                 = 80
   protocol             = "HTTP"
