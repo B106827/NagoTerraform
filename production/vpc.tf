@@ -123,7 +123,7 @@ module "vpc" {
 # ---------------------------
 # デフォルトルートテーブル
 # ---------------------------
-resource "aws_default_route_table" "default-rtb" {
+resource "aws_default_route_table" "default_rtb" {
   default_route_table_id = module.vpc.default_route_table_id
   tags = {
     Name = "${local.project_name_env}-default-rtb"

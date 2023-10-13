@@ -42,7 +42,7 @@ resource "aws_db_instance" "rds" {
   allocated_storage = local.db_storage_size
   # セキュリティグループ
   vpc_security_group_ids = [
-     aws_security_group.app-sg.id,
+     aws_security_group.app_sg.id,
   ]
   # CloudWatch に出力するログ
   enabled_cloudwatch_logs_exports = [

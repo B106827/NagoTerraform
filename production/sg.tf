@@ -9,7 +9,7 @@ locals {
 # Security Group
 # ---------------------------
 # ALB用SG
-resource "aws_security_group" "alb-sg" {
+resource "aws_security_group" "alb_sg" {
   name   = "${local.project_name_env}-alb-sg"
   vpc_id = module.vpc.vpc_id
 
@@ -43,7 +43,7 @@ resource "aws_security_group" "alb-sg" {
 }
 
 # VPC内接続用SG（このSGが設定されたインスタンス同士は通信可能となる)
-resource "aws_security_group" "app-sg" {
+resource "aws_security_group" "app_sg" {
   name   = "${local.project_name_env}-app-sg"
   vpc_id = module.vpc.vpc_id
 
