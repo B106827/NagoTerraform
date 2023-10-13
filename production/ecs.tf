@@ -4,7 +4,6 @@
 locals {
   # サービス
   service_task_desired_count = 0
-  service_launch_type        = "FARGATE"
   service_assign_public_ip   = false
 
   # タスク
@@ -20,6 +19,10 @@ locals {
 # クラスター
 resource "aws_ecs_cluster" "app-cluster" {
   name = "${local.project_name_env}-cluster"
+  capacity_providers = [
+    "FARGATE",
+    "FARGATE_SPOT"
+  ]
   tags = {
     Name = "${local.project_name_env}-cluster"
   }
@@ -28,8 +31,6 @@ resource "aws_ecs_cluster" "app-cluster" {
 resource "aws_ecs_service" "app-service" {
   name    = "${local.project_name_env}-service"
   cluster = aws_ecs_cluster.app-cluster.id
-  # コンピューティング設定
-  launch_type = local.service_launch_type
   # タスク設定
   task_definition = aws_ecs_task_definition.app-task.arn
   desired_count   = local.service_task_desired_count
@@ -47,6 +48,25 @@ resource "aws_ecs_service" "app-service" {
     target_group_arn = aws_lb_target_group.alb_tg_nginx.arn
     container_name   = "${local.project_name_env}-nginx-container"
     container_port   = 80
+  }
+  # キャパシティプロバイダー戦略
+  capacity_provider_strategy {
+    capacity_provider = "FARGATE"
+    base              = 0
+    weight            = 0
+  }
+  capacity_provider_strategy {
+    capacity_provider = "FARGATE_SPOT"
+    base              = 0
+    weight            = 1
+  }
+
+  lifecycle {
+    ignore_changes = [
+      desired_count,
+      task_definition,
+      capacity_provider_strategy
+    ]
   }
 }
 # タスク定義
