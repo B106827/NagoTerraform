@@ -36,7 +36,7 @@ resource "aws_lb_listener" "alb_listener_http" {
   port              = 80
   protocol          = "HTTP"
   default_action {
-    type             = "fixed-response"
+    type = "fixed-response"
     fixed_response {
       content_type = "text/plain"
       status_code  = "200"
@@ -46,8 +46,8 @@ resource "aws_lb_listener" "alb_listener_http" {
 }
 
 # ターゲットグループ
-resource "aws_lb_target_group" "alb_tg_app" {
-  name                 = "${local.project_name_env}-alb-tg-app"
+resource "aws_lb_target_group" "alb_tg_nginx" {
+  name                 = "${local.project_name_env}-alb-tg-nginx"
   port                 = 80
   protocol             = "HTTP"
   vpc_id               = module.vpc.vpc_id
@@ -65,6 +65,25 @@ resource "aws_lb_target_group" "alb_tg_app" {
   }
 
   tags = {
-    Name = "${local.project_name_env}-alb-tg-app"
+    Name = "${local.project_name_env}-alb-tg-nginx"
+  }
+}
+
+# リスナールール
+resource "aws_lb_listener_rule" "alb_listener_rule" {
+  # 適用するリスナー
+  listener_arn = aws_lb_listener.alb_listener_http.arn
+  # 受け取ったトラフィックをターゲットグループへ渡す
+  action {
+    type = "forward"
+    target_group_arn = aws_lb_target_group.alb_tg_nginx.arn
+  }
+  # ターゲットグループへ渡すトラフィックの条件
+  condition {
+    host_header {
+      values = [
+        local.project_domain
+      ]
+    }
   }
 }

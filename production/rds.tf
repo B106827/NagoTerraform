@@ -26,7 +26,7 @@ resource "aws_db_subnet_group" "private" {
 
 # RDS インスタンス
 resource "aws_db_instance" "rds" {
-  name                 = "${local.project_prefix}-${local.project_env}-rds"
+  name                 = "${local.project_prefix}_${local.project_env}_rds"
   identifier           = "${local.project_name_env}-rds"
   db_subnet_group_name = aws_db_subnet_group.private.id
   engine               = local.db_engine

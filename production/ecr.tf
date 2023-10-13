@@ -2,8 +2,8 @@
 # ECR
 # ---------------------------
 # ECR
-resource "aws_ecr_repository" "app" {
-  name = "${local.project_name_env}/app"
+resource "aws_ecr_repository" "nginx" {
+  name = "${local.project_name_env}/nginx"
   image_tag_mutability = "MUTABLE"
   image_scanning_configuration {
     scan_on_push = true
