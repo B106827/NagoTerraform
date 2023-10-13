@@ -3,7 +3,7 @@
 # ---------------------------
 locals {
   # サービス
-  service_task_desired_count = 0
+  service_task_desired_count = 1     # 初期タスク数
   service_assign_public_ip   = false
 
   # タスク
@@ -34,6 +34,8 @@ resource "aws_ecs_service" "app-service" {
   # タスク設定
   task_definition = aws_ecs_task_definition.app-task.arn
   desired_count   = local.service_task_desired_count
+  # ECS Exec を利用可能
+  enable_execute_command = true
   # ネットワーク設定
   network_configuration {
     subnets = module.vpc.private_subnets
@@ -59,6 +61,12 @@ resource "aws_ecs_service" "app-service" {
     capacity_provider = "FARGATE_SPOT"
     base              = 0
     weight            = 1
+  }
+
+  # デプロイサーキットブレーカー設定
+  deployment_circuit_breaker {
+    enable   = true
+    rollback = true
   }
 
   lifecycle {
