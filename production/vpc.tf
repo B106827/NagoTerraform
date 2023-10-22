@@ -80,7 +80,6 @@ module "vpc" {
     rule_no    = 100
     to_port    = 0
   }]
-
   # タグ
   tags = {
     Name = "${local.project_name_env}"
@@ -127,5 +126,59 @@ resource "aws_default_route_table" "default_rtb" {
   default_route_table_id = module.vpc.default_route_table_id
   tags = {
     Name = "${local.project_name_env}-default-rtb"
+  }
+}
+
+# ---------------------------
+# VPCエンドポイント
+# ---------------------------
+# S3（Gateway型はルートテーブルとの紐付けが必要）
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id            = module.vpc.vpc_id
+  service_name      = "com.amazonaws.ap-northeast-1.s3"
+  vpc_endpoint_type = "Gateway"
+  tags = {
+    Name = "${local.project_name_env}-vpc-endpoint-s3"
+  }
+}
+resource "aws_vpc_endpoint_route_table_association" "private_s3" {
+  count           = length(module.vpc.private_subnets)
+  vpc_endpoint_id = aws_vpc_endpoint.s3.id
+  route_table_id  = aws_default_route_table.default_rtb.id
+}
+# ECR（DKR）
+resource "aws_vpc_endpoint" "ecr_dkr" {
+  vpc_id              = module.vpc.vpc_id
+  service_name        = "com.amazonaws.ap-northeast-1.ecr.dkr"
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = module.vpc.private_subnets
+  security_group_ids  = [aws_security_group.vpc_endpoint.id]
+  private_dns_enabled = true
+  tags = {
+    Name = "${local.project_name_env}-vpc-endpoint-ecr-dkr"
+  }
+}
+# ECR（API）
+resource "aws_vpc_endpoint" "ecr_api" {
+  vpc_id              = module.vpc.vpc_id
+  service_name        = "com.amazonaws.ap-northeast-1.ecr.api"
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = module.vpc.private_subnets
+  security_group_ids  = [aws_security_group.vpc_endpoint.id]
+  private_dns_enabled = true
+  tags = {
+    Name = "${local.project_name_env}-vpc-endpoint-ecr-api"
+  }
+}
+# CloudWatch
+resource "aws_vpc_endpoint" "logs" {
+  vpc_id              = module.vpc.vpc_id
+  service_name        = "com.amazonaws.ap-northeast-1.logs"
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = module.vpc.private_subnets
+  security_group_ids  = [aws_security_group.vpc_endpoint.id]
+  private_dns_enabled = true
+  tags = {
+    Name = "${local.project_name_env}-vpc-endpoint-logs"
   }
 }

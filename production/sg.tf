@@ -65,3 +65,29 @@ resource "aws_security_group" "app_sg" {
     Name = "${local.project_name_env}-app-sg"
   }
 }
+
+# VPCエンドポイント用SG
+resource "aws_security_group" "vpc_endpoint" {
+  name   = "${local.project_name_env}-vpc-endpoint-sg"
+  vpc_id = module.vpc.vpc_id
+
+  ingress {
+    protocol  = "tcp"
+    from_port = 443
+    to_port   = 443
+    cidr_blocks = [
+      module.vpc.vpc_cidr_block
+    ]
+  }
+  egress {
+    protocol  = "tcp"
+    from_port = 443
+    to_port   = 443
+    cidr_blocks = [
+      module.vpc.vpc_cidr_block
+    ]
+  }
+  tags = {
+    Name = "${local.project_name_env}-vpc-endpoint-sg"
+  }
+}
