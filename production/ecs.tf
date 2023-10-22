@@ -3,7 +3,7 @@
 # ---------------------------
 locals {
   # サービス
-  service_task_desired_count = 1     # 初期タスク数
+  service_task_desired_count = 0     # 初期タスク数
   service_assign_public_ip   = false
 
   # タスク
@@ -36,6 +36,8 @@ resource "aws_ecs_service" "app-service" {
   desired_count   = local.service_task_desired_count
   # ECS Exec を利用可能
   enable_execute_command = true
+  # ヘルスチェック開始までの待機時間
+  health_check_grace_period_seconds = 1200
   # ネットワーク設定
   network_configuration {
     subnets = module.vpc.private_subnets
@@ -71,7 +73,7 @@ resource "aws_ecs_service" "app-service" {
 
   lifecycle {
     ignore_changes = [
-      desired_count,
+      #desired_count,
       task_definition,
       capacity_provider_strategy
     ]
@@ -82,8 +84,9 @@ resource "aws_ecs_task_definition" "app-task" {
   family                   = "${local.project_name_env}-app-task"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
-  task_role_arn            = aws_iam_role.ecs_task_role.arn
-  execution_role_arn       = aws_iam_role.ecs_task_execute_role.arn
+  # FIXME: ecsTaskExecutionRoleは先に用意されている前提
+  task_role_arn            = "arn:aws:iam::${data.aws_caller_identity.self.account_id}:role/ecsTaskExecutionRole"
+  execution_role_arn       = "arn:aws:iam::${data.aws_caller_identity.self.account_id}:role/ecsTaskExecutionRole"
   cpu                      = local.task_cpu
   memory                   = local.task_memory
   container_definitions    = local.task_container_definitions
@@ -114,7 +117,7 @@ locals {
     "logConfiguration": {
       "logDriver": "awslogs",
       "options": {
-        "awslogs-group": "${local.project_name_env}-nginx-log-group",
+        "awslogs-group": "${local.project_name_env}-log-group",
         "awslogs-region": "${local.region}",
         "awslogs-stream-prefix": "nginx"
       }
@@ -143,7 +146,7 @@ locals {
     "logConfiguration": {
       "logDriver": "awslogs",
       "options": {
-        "awslogs-group": "${local.project_name_env}-api-log-group",
+        "awslogs-group": "${local.project_name_env}-log-group",
         "awslogs-region": "${local.region}",
         "awslogs-stream-prefix": "api"
       }
@@ -151,4 +154,12 @@ locals {
   }
 ]
 EOF
+}
+# CloudWatchロググループ
+resource "aws_cloudwatch_log_group" "nginx-log-group" {
+  name              = "${local.project_name_env}-log-group"
+  retention_in_days = 7
+  lifecycle {
+    ignore_changes = [retention_in_days]
+  }
 }
