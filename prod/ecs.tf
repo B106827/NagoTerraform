@@ -3,7 +3,7 @@
 # ---------------------------
 locals {
   # サービス
-  service_task_desired_count = 0     # 初期タスク数
+  service_task_desired_count = 1     # 初期タスク数
   service_assign_public_ip   = false
 
   # タスク
