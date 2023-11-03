@@ -39,8 +39,8 @@ resource "aws_lb_listener" "alb_listener_http" {
     type = "fixed-response"
     fixed_response {
       content_type = "text/plain"
-      status_code  = "200"
-      message_body = "OK（test）"
+      status_code  = "404"
+      message_body = "Not Found"
     }
   }
 }
@@ -75,15 +75,18 @@ resource "aws_lb_listener_rule" "alb_listener_rule" {
   listener_arn = aws_lb_listener.alb_listener_http.arn
   # 受け取ったトラフィックをターゲットグループへ渡す
   action {
-    type = "forward"
+    type             = "forward"
     target_group_arn = aws_lb_target_group.alb_tg_nginx.arn
   }
   # ターゲットグループへ渡すトラフィックの条件
   condition {
-    host_header {
-      values = [
-        local.project_domain
-      ]
+    path_pattern {
+      values = ["*"]
     }
+    #host_header {
+    #  values = [
+    #    local.project_domain
+    #  ]
+    #}
   }
 }
