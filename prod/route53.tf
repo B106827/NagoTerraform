@@ -13,34 +13,24 @@ locals {
 # ホストゾーン
 # Terraform で NS レコードを作成後、レジストラ側に登録する
 resource "aws_route53_zone" "main-zone" {
-  name = local.project_domain
+  name = local.project_primary_domain
   lifecycle {
     prevent_destroy = true
   }
 }
 # NSレコード
 resource "aws_route53_record" "main-ns-record" {
-  name            = local.project_domain
+  name            = local.project_primary_domain
   zone_id         = aws_route53_zone.main-zone.zone_id
   allow_overwrite = true
   type            = "NS"
   records         = aws_route53_zone.main-zone.name_servers
-  ttl             = local.initial_ttl
+  ttl             = local.fixed_ttl
 }
 
 # Aレコード for ALB
-resource "aws_route53_record" "main-a-record" {
-  name    = local.project_domain
-  zone_id = aws_route53_zone.main-zone.zone_id
-  type    = "A"
-  alias {
-    name                   = aws_lb.alb.dns_name
-    zone_id                = aws_lb.alb.zone_id
-    evaluate_target_health = true
-  }
-}
 resource "aws_route53_record" "wildcard-a-record" {
-  name    = "*.${local.project_domain}"
+  name    = local.project_domain
   zone_id = aws_route53_zone.main-zone.zone_id
   type    = "A"
   alias {
@@ -64,7 +54,7 @@ resource "aws_route53_record" "dns-verify" {
   name            = each.value.name
   records         = [each.value.record]
   type            = each.value.type
-  ttl             = local.initial_ttl
+  ttl             = local.fixed_ttl
 }
 resource "aws_acm_certificate_validation" "dns-cert-validation" {
   certificate_arn = aws_acm_certificate.all-cert.arn
