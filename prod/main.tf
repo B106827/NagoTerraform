@@ -8,7 +8,8 @@ locals {
   # 「nago-prd」
   project_name_env = "${local.project_prefix}-${local.project_env}"
 
-  project_domain   = "bon-go.net"
+  project_primary_domain = "bon-go.net"
+  project_domain         = "ec.bon-go.net"
 
   # 東京リージョン
   region = "ap-northeast-1"
