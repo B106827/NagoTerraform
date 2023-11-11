@@ -17,7 +17,7 @@ locals {
 # ECS
 # ---------------------------
 # クラスター
-resource "aws_ecs_cluster" "app-cluster" {
+resource "aws_ecs_cluster" "app_cluster" {
   name = "${local.project_name_env}-cluster"
   capacity_providers = [
     "FARGATE",
@@ -28,11 +28,11 @@ resource "aws_ecs_cluster" "app-cluster" {
   }
 }
 # サービス
-resource "aws_ecs_service" "app-service" {
+resource "aws_ecs_service" "app_service" {
   name    = "${local.project_name_env}-service"
-  cluster = aws_ecs_cluster.app-cluster.id
+  cluster = aws_ecs_cluster.app_cluster.id
   # タスク設定
-  task_definition = aws_ecs_task_definition.app-task.arn
+  task_definition = aws_ecs_task_definition.app_task.arn
   desired_count   = local.service_task_desired_count
   # ECS Exec を利用可能
   enable_execute_command = true
@@ -80,7 +80,7 @@ resource "aws_ecs_service" "app-service" {
   }
 }
 # タスク定義
-resource "aws_ecs_task_definition" "app-task" {
+resource "aws_ecs_task_definition" "app_task" {
   family                   = "${local.project_name_env}-app-task"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
@@ -156,7 +156,7 @@ locals {
 EOF
 }
 # CloudWatchロググループ
-resource "aws_cloudwatch_log_group" "nginx-log-group" {
+resource "aws_cloudwatch_log_group" "nginx_log_group" {
   name              = "${local.project_name_env}-log-group"
   retention_in_days = 7
   lifecycle {
