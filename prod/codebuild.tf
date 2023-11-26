@@ -40,7 +40,7 @@ resource "aws_codebuild_project" "main_project" {
     }
     environment_variable {
       name  = "AWS_DEFAULT_REGION"
-      value = data.aws_caller_identity.self.account_id
+      value = local.region
     }
   }
 }
