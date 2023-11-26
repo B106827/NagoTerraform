@@ -3,7 +3,8 @@
 # ---------------------------
 locals {
   # リポジトリ
-  repos_url = "https://github.com/B106827/Nago.git"
+  repos_url                  = "https://github.com/B106827/Nago.git"
+  docker_hub_my_access_token = "dckr_pat_erlBrGrytb0BL1IUrw43xBGXAuQ"
 }
 
 # ---------------------------
@@ -41,6 +42,10 @@ resource "aws_codebuild_project" "main_project" {
     environment_variable {
       name  = "AWS_DEFAULT_REGION"
       value = local.region
+    }
+    environment_variable {
+      name  = "DOCKER_HUB_MY_ACCESS_TOKEN"
+      value = local.docker_hub_my_access_token
     }
   }
 }
