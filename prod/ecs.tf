@@ -2,7 +2,10 @@
 # 変数定義
 # ---------------------------
 locals {
+  # クラスター
+  cluster_name = "${local.project_name_env}-cluster"
   # サービス
+  service_name               = "${local.project_name_env}-service"
   service_task_desired_count = 1     # 初期タスク数
   service_assign_public_ip   = false
 
@@ -18,18 +21,18 @@ locals {
 # ---------------------------
 # クラスター
 resource "aws_ecs_cluster" "app_cluster" {
-  name = "${local.project_name_env}-cluster"
+  name = local.cluster_name
   capacity_providers = [
     "FARGATE",
     "FARGATE_SPOT"
   ]
   tags = {
-    Name = "${local.project_name_env}-cluster"
+    Name = local.cluster_name
   }
 }
 # サービス
 resource "aws_ecs_service" "app_service" {
-  name    = "${local.project_name_env}-service"
+  name    = local.service_name
   cluster = aws_ecs_cluster.app_cluster.id
   # タスク設定
   task_definition = aws_ecs_task_definition.app_task.arn

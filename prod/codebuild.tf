@@ -4,6 +4,7 @@
 locals {
   # リポジトリ
   repos_url                  = "https://github.com/B106827/Nago.git"
+  docker_hub_user_id         = "b106827"
   docker_hub_my_access_token = "dckr_pat_erlBrGrytb0BL1IUrw43xBGXAuQ"
 }
 
@@ -29,7 +30,7 @@ resource "aws_codebuild_project" "main_project" {
   # ビルドマシンに関する設定
   environment {
     compute_type                = "BUILD_GENERAL1_SMALL"
-    image                       = "aws/codebuild/standard:4.0"
+    image                       = "aws/codebuild/amazonlinux2-x86_64-standard:4.0"
     type                        = "LINUX_CONTAINER"
     image_pull_credentials_type = "CODEBUILD"
     privileged_mode             = true
@@ -44,8 +45,28 @@ resource "aws_codebuild_project" "main_project" {
       value = local.region
     }
     environment_variable {
+      name  = "DOCKER_HUB_LOGIN_USER"
+      value = local.docker_hub_user_id
+    }
+    environment_variable {
       name  = "DOCKER_HUB_MY_ACCESS_TOKEN"
       value = local.docker_hub_my_access_token
+    }
+    environment_variable {
+      name  = "ECS_CLUSTER_NAME"
+      value = local.cluster_name
+    }
+    environment_variable {
+      name  = "ECS_SERVICE_NAME"
+      value = local.service_name
+    }
+    environment_variable {
+      name  = "REPOSITORY_APP_NAME"
+      value = local.repository_app_name
+    }
+    environment_variable {
+      name  = "REPOSITORY_API_NAME"
+      value = local.repository_api_name
     }
   }
 }

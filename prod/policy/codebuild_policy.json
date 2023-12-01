@@ -7,6 +7,16 @@
         "*"
       ],
       "Action": [
+        "ecs:DeregisterTaskDefinition",
+        "ecs:DescribeServices",
+        "ecs:DescribeTaskDefinition",
+        "ecs:DescribeTasks",
+        "ecs:ListTasks",
+        "ecs:ListTaskDefinitions",
+        "ecs:RegisterTaskDefinition",
+        "ecs:StartTask",
+        "ecs:StopTask",
+        "ecs:UpdateService",
         "ecr:BatchCheckLayerAvailability",
         "ecr:CompleteLayerUpload",
         "ecr:GetAuthorizationToken",
@@ -15,7 +25,8 @@
         "ecr:UploadLayerPart",
         "logs:CreateLogGroup",
         "logs:CreateLogStream",
-        "logs:PutLogEvents"
+        "logs:PutLogEvents",
+        "iam:PassRole"
       ]
     }
   ]
