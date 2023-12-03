@@ -4,7 +4,7 @@
 
 <img src="https://lh3.googleusercontent.com/d/1lS1mgx9kLopvKIjY7De-8cyNBqQDm1Jt">
 
-※ インフラを変更した場合は構成図も更新すること
+※ インフラを変更した場合は構成図も更新すること（draw.io）
 
 ## URL
 
