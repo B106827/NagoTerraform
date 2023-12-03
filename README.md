@@ -2,7 +2,7 @@
 
 ## 構成図
 
-<img src="https://drive.google.com/file/d/1lS1mgx9kLopvKIjY7De-8cyNBqQDm1Jt/view?usp=sharing">
+<img src="https://drive.google.com/uc?export=view&id=1lS1mgx9kLopvKIjY7De-8cyNBqQDm1Jt">
 
 ※ インフラを変更した場合は構成図も更新すること
 
